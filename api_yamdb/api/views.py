@@ -8,6 +8,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import filters, mixins, permissions, viewsets
+
+from reviews.models import Category, Genre, GenreTitle, Title
+
+from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+
 
 from reviews.models import User
 from .serializers import SignupSerializer, TokenSerializer
@@ -50,3 +56,19 @@ def send_confirmation_code(user):
     admin_email = settings.ADMIN_EMAIL
     user_email = [user.email]
     return send_mail(subject, message, admin_email, user_email)
+class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (permissions.AllowAny,)
+
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (permissions.AllowAny,)
+
+
+class TitleViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (permissions.AllowAny,)
