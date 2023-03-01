@@ -1,5 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
+
+ROLE_CHOICES = (
+    ('user', 'Пользователь'),
+    ('moderator', 'Модератор'),
+    ('admin', 'Администратор'),
+)
 
 class Category(models.Model):
     name = models.CharField(
@@ -66,3 +73,26 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} <-> {self.title}'
+
+
+class User(AbstractUser):
+    email = models.EmailField(
+        unique=True,
+        verbose_name='Адрес электронной почты'
+    )
+    role = models.CharField(
+        max_length=255,
+        choices=ROLE_CHOICES,
+        default='user',
+        verbose_name='Роль'
+    )
+    bio = models.TextField(
+        blank=True,
+        verbose_name='Биография'
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+
+    def __str__(self) -> str:
+        return self.username
