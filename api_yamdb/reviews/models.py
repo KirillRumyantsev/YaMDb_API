@@ -11,6 +11,9 @@ class Category(models.Model):
         max_length=50,
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Genre(models.Model):
     name = models.CharField(
@@ -21,6 +24,9 @@ class Genre(models.Model):
         unique=True,
         max_length=50,
     )
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
@@ -37,12 +43,26 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         related_name='titles',
-        on_delete=models.CASCADE,
-        blank=True, null=True,
+        on_delete=models.SET_NULL,
         verbose_name='Категория',
+        blank=True, null=True
     )
+
+    def __str__(self):
+        return self.name
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(
+        Genre,
+        blank=True, null=True,
+        on_delete=models.SET_NULL
+    )
+    title = models.ForeignKey(
+        Title,
+        blank=True, null=True,
+        on_delete=models.SET_NULL
+    )
+
+    def __str__(self):
+        return f'{self.genre} <-> {self.title}'
