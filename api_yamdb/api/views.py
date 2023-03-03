@@ -13,7 +13,29 @@ from rest_framework import filters, mixins, permissions, viewsets
 from reviews.models import Category, Genre, GenreTitle, Title, User
 
 from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
-                          SignupSerializer, TokenSerializer)
+                          SignupSerializer, TokenSerializer, UserSerializer)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+
+    @action(
+        detail=False, methods=['get', 'patch'],
+        url_path='me', url_name='me',
+        permission_classes=(IsAuthenticated,)
+    )
+    def about_me(self, request):
+        serializer = UserSerializer(request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
