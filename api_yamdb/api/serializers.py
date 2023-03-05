@@ -4,8 +4,6 @@ from rest_framework import serializers
 
 from reviews.models import (ROLE_CHOICES, Category, Genre, GenreTitle, Title,
                             User)
-from reviews.models import (ROLE_CHOICES, Category, Genre, GenreTitle, Title,
-                            User)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,10 +32,6 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, required=True)
 
     class Meta:
-        model = Title
-        fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category'
-        )  # 'rating',
         fields = (
             'id', 'name', 'year', 'description', 'genre', 'category'
         )  # 'rating',
@@ -58,9 +52,6 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def validate_year(self, value):
         if value > dt.date.today().year:
-            raise serializers.ValidationError(
-                'Год выпуска не может быть больше текущего!'
-            )
             raise serializers.ValidationError(
                 'Год выпуска не может быть больше текущего!'
             )
