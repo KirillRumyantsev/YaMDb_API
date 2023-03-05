@@ -1,6 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.db import models
 
 ROLE_CHOICES = (
     ('user', 'Пользователь'),
@@ -11,13 +10,17 @@ ROLE_CHOICES = (
 
 class Category(models.Model):
     name = models.CharField(
-        'Название категории',
+        verbose_name='Название категории',
         max_length=256,
     )
     slug = models.SlugField(
         unique=True,
         max_length=50,
     )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
@@ -25,7 +28,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        'Название жанра',
+        verbose_name='Название жанра',
         max_length=256,
     )
     slug = models.SlugField(
@@ -33,20 +36,30 @@ class Genre(models.Model):
         max_length=50,
     )
 
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
     name = models.CharField(
-        'Название роизведения',
+        verbose_name='Название роизведения',
         max_length=256,
     )
-    year = models.IntegerField()
-    description = models.TextField('Описание произведения')
+    year = models.PositiveIntegerField(
+        verbose_name='Год'
+    )
+    description = models.TextField(
+        verbose_name='Описание произведения'
+    )
     genre = models.ManyToManyField(
         Genre,
+        verbose_name='Год',
         through='GenreTitle',
+        related_name='titles',
     )
     category = models.ForeignKey(
         Category,
@@ -56,6 +69,11 @@ class Title(models.Model):
         blank=True, null=True
     )
 
+    class Meta:
+        ordering = ('year',)
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
     def __str__(self):
         return self.name
 
@@ -63,14 +81,18 @@ class Title(models.Model):
 class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
-        blank=True, null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.DO_NOTHING,
+        related_name='titles_through',
     )
     title = models.ForeignKey(
         Title,
-        blank=True, null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.DO_NOTHING,
+        related_name='genres_through',
     )
+
+    class Meta:
+        verbose_name = 'Связь жанра и произведения'
+        verbose_name_plural = 'Связи жанров и произведений'
 
     def __str__(self):
         return f'{self.genre} <-> {self.title}'
@@ -94,6 +116,7 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.username
