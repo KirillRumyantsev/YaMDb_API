@@ -61,9 +61,6 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Год выпуска не может быть больше текущего!'
             )
-            raise serializers.ValidationError(
-                'Год выпуска не может быть больше текущего!'
-            )
         return value
 
 
