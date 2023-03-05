@@ -32,9 +32,8 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, required=True)
 
     class Meta:
-        model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category'
+            'name', 'year', 'description', 'genre', 'category'
         )  # 'rating',
 
     def create(self, validated_data):
