@@ -9,12 +9,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Category, Genre, GenreTitle, Title, Review, Comment
+from reviews.models import User, Category, Genre, GenreTitle, Title, Review, Comment
 
+from .permissions import IsAuthorModAdminOrReadOnlyPermission
 from .permissions import IsAdminOrReadOnly
 from .serializers import (CategorySerializer, GenreSerializer,
                           SignupSerializer, TitleSerializer, TokenSerializer,
-                          UserSerializer)
+                          UserSerializer, ReviewSerializer, CommentSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
