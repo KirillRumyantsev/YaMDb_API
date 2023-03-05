@@ -1,11 +1,10 @@
 import datetime as dt
+from django.db.models import Avg
 
 from rest_framework import serializers
 
 from reviews.models import (ROLE_CHOICES, Category, Genre, GenreTitle, Title,
-                            User)
-from reviews.models import (ROLE_CHOICES, Category, Genre, GenreTitle, Title,
-                            User)
+                            User, Review, Comment)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,16 +31,17 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, required=True)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category'
-        )  # 'rating',
-        fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category'
-        )  # 'rating',
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
+    def get_rating(self, obj):
+        return Title.objects.annotate(avg_rating=Avg('reviews__rating'))
+    
     def create(self, validated_data):
         if 'genre' not in self.initial_data:
             title = Title.objects.create(**validated_data)
@@ -87,3 +87,20 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+     text = serializers.CharField(required=True)
+     score = serializers.IntegerField(required=True)
+
+     class Meta:
+         model = Review
+         fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+     text = serializers.CharField(required=True)
+
+     class Meta:
+         model = Comment
+         fields = ('id', 'text', 'author', 'pub_date')
