@@ -40,8 +40,9 @@ class TitleSerializer(serializers.ModelSerializer):
         )
 
     def get_rating(self, obj):
-        return Title.objects.annotate(avg_rating=Avg('reviews__rating'))
-
+        result = Title.objects.aggregate(rating=Avg('reviews__score'))
+        return result['rating']
+ 
     def create(self, validated_data):
         if 'genre' not in self.initial_data:
             title = Title.objects.create(**validated_data)
@@ -87,17 +88,23 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-     text = serializers.CharField(required=True)
-     score = serializers.IntegerField(required=True)
+    text = serializers.CharField(required=True)
+    score = serializers.IntegerField(required=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
-     class Meta:
-         model = Review
-         fields = ('id', 'text', 'author', 'score', 'pub_date')
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
 
 class CommentSerializer(serializers.ModelSerializer):
-     text = serializers.CharField(required=True)
+    text = serializers.CharField(required=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
-     class Meta:
-         model = Comment
-         fields = ('id', 'text', 'author', 'pub_date')
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
