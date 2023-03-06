@@ -48,7 +48,6 @@ class TitleSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         result = Title.objects.aggregate(rating=Avg('reviews__score'))
         return result['rating']
- 
 
     def create(self, validated_data):
         if 'genre' not in self.initial_data:
@@ -104,6 +103,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title')
+            )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):

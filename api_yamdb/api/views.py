@@ -12,9 +12,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import (User, Category, Genre,
                             GenreTitle, Title, Review, Comment)
 
+# from .permissions import (IsAdmin, IsModerator,
+#                           IsAdminOrReadOnly, IsAuthorOrReadOnly)
 from .permissions import IsAuthorModAdminOrReadOnlyPermission
-from .permissions import (IsAdmin, IsModerator,
-                          IsAdminOrReadOnly, IsAuthorOrReadOnly)
 from .serializers import (CategorySerializer, GenreSerializer,
                           SignupSerializer, TitleSerializer, TokenSerializer,
                           UserSerializer, ReviewSerializer, CommentSerializer)
