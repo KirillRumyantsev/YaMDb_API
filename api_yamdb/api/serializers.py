@@ -96,6 +96,9 @@ class TokenSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     text = serializers.CharField(required=True)
     score = serializers.IntegerField(required=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
     class Meta:
         model = Review
@@ -110,6 +113,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     text = serializers.CharField(required=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
     class Meta:
         model = Comment
