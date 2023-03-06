@@ -3,16 +3,18 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import User, Category, Genre, GenreTitle, Title, Review, Comment
+from reviews.models import (User, Category, Genre,
+                            GenreTitle, Title, Review, Comment)
 
-from .permissions import IsAuthorModAdminOrReadOnlyPermission
-from .permissions import IsAdminOrReadOnly
+# from .permissions import IsAuthorModAdminOrReadOnlyPermission
+from .permissions import (IsAdmin, IsModerator,
+                          IsAdminOrReadOnly, IsAuthorOrReadOnly)
 from .serializers import (CategorySerializer, GenreSerializer,
                           SignupSerializer, TitleSerializer, TokenSerializer,
                           UserSerializer, ReviewSerializer, CommentSerializer)
@@ -22,7 +24,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdmin,)
 
     @action(
         detail=False, methods=['get', 'patch'],
@@ -83,13 +85,13 @@ def send_confirmation_code(user):
 class GenreViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -101,7 +103,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorModAdminOrReadOnlyPermission,)
+    permission_classes = (
+        IsAdmin | IsModerator | IsAuthorOrReadOnly,
+    )
+    # permission_classes = (IsAuthorModAdminOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -109,7 +114,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorModAdminOrReadOnlyPermission,)
+    permission_classes = (
+        IsAdmin | IsModerator | IsAuthorOrReadOnly,
+    )
+    # permission_classes = (IsAuthorModAdminOrReadOnlyPermission,)
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
