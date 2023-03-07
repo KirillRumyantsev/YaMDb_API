@@ -124,10 +124,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAdmin | IsModerator | IsAuthorOrReadOnly,
     )
 
-    def get_queryset(self):
-        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
-        return review.comments
-
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
