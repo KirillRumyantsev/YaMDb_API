@@ -119,6 +119,7 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitlePostSerializer
         return TitleListSerializer
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
