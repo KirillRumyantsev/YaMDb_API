@@ -1,26 +1,20 @@
-from django.conf import settings
-from django.db.models import Avg
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework import filters
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
-                            Title, User)
-
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .permissions import (IsAuthorOrReadOnly, IsRoleAdmin, IsRoleModerator,
                           ReadOnly)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer,
-                          AuthentificationSerializer, TitleListSerializer,
-                          TitlePostSerializer, UserSerializer,
-                          TokenSerializer)
+from .serializers import (AuthentificationSerializer, CategorySerializer,
+                          CommentSerializer, GenreSerializer, ReviewSerializer,
+                          TitleListSerializer, TitlePostSerializer,
+                          TokenSerializer, UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -95,6 +89,8 @@ def confirmation(request):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
     permission_classes = (IsRoleAdmin | ReadOnly,)
     lookup_field = 'slug'
 
@@ -102,15 +98,15 @@ class GenreViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
     permission_classes = (IsRoleAdmin | ReadOnly,)
     lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = (
-        Title.objects.all()
-        .annotate(rating=Avg('reviews__score'))
-        .order_by('-id')
+        Title.objects.annotate(rating=Avg('reviews__score')).order_by('-id')
     )
     permission_classes = (IsRoleAdmin | ReadOnly,)
 
