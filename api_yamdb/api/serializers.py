@@ -1,7 +1,7 @@
 import datetime as dt
 
-from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (Category, Comment, Genre, GenreTitle,
                             Review, Title, User)
@@ -83,7 +83,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleListSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, required=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField()
     category = CategorySerializer()
     description = serializers.CharField(required=False)
 
@@ -92,10 +92,6 @@ class TitleListSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
-
-    def get_rating(self, obj):
-        result = Title.objects.aggregate(rating=Avg('reviews__score'))
-        return result['rating']
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
@@ -114,7 +110,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category'
+            'name', 'year', 'description', 'genre', 'category'
         )
 
     def validate_year(self, value):
@@ -125,16 +121,38 @@ class TitlePostSerializer(serializers.ModelSerializer):
         return value
 
 
+class SignupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     text = serializers.CharField(required=True)
     score = serializers.IntegerField(required=True)
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username', read_only=True,
+        default=serializers.CurrentUserDefault()
     )
+    title = serializers.HiddenField(default=Title.objects.all())
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
+        validators = [
+           UniqueTogetherValidator(
+            Review.objects.all(),
+            fields=['title', 'author'],
+            message='Отзыв уже оставлен'
+           )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
